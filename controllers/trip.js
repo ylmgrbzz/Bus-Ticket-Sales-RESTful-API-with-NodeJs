@@ -45,3 +45,55 @@ router.get("/trip/:id", async (req, res) => {
 });
 
 module.exports = router;
+
+// 9. Detaylı sefer bilgisi endpointi
+router.get("/trips/:id/details", async (req, res) => {
+  const { id } = req.params;
+
+  try {
+    const trip = await Trip.findById(id);
+    if (!trip) {
+      return res.status(404).json({ message: "Sefer bulunamadı" });
+    }
+
+    const detailedInfo = trip.getDetailedInfo();
+    res.json(detailedInfo);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+});
+
+router.get("/trips/:from/:to/details", async (req, res) => {
+  const { from, to } = req.params;
+
+  try {
+    const trips = await Trip.find({ from, to });
+    const result = trips.map((trip) => {
+      const { _id, from, to, date, time, price, seats } = trip;
+      const availableSeats = seats.filter((seat) => !seat.isBooked);
+      const bookedSeats = seats.filter((seat) => seat.isBooked);
+      const maleSeats = bookedSeats.filter((seat) => seat.gender === "male");
+      const femaleSeats = bookedSeats.filter(
+        (seat) => seat.gender === "female"
+      );
+
+      return {
+        _id,
+        from,
+        to,
+        date,
+        time,
+        price,
+        totalSeats: seats.length,
+        availableSeats: availableSeats.length,
+        bookedSeats: bookedSeats.length,
+        maleSeats: maleSeats.length,
+        femaleSeats: femaleSeats.length,
+      };
+    });
+
+    res.json(result);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+});
