@@ -12,8 +12,8 @@ mongoose.connection.on("error", (error) => console.log(error));
 mongoose.connection.once("open", () => console.log("Database connected!"));
 
 app.use(bodyParser.json());
-app.use("/users/login", requireAuth, userRoutes);
-app.use("/users/register", userRoutes);
+app.use("/users/login", requireAuth);
+app.use("/users", userRoutes);
 
 // Sunucu başlat
 const port = 3000;
