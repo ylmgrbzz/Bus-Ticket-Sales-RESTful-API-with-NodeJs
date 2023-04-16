@@ -3,10 +3,10 @@ const bodyParser = require("body-parser");
 const mongoose = require("mongoose");
 const userRoutes = require("./controllers/user");
 const { requireAuth } = require("./middleware/user");
+const tripRoutes = require("./controllers/trip");
 
 const app = express();
 
-// Veritabanına bağlanmak için Mongoose kullanın
 mongoose.connect("mongodb://localhost/mydatabase", { useNewUrlParser: true });
 mongoose.connection.on("error", (error) => console.log(error));
 mongoose.connection.once("open", () => console.log("Database connected!"));
@@ -16,8 +16,8 @@ app.use(bodyParser.json());
 // app.use("/users", userRoutes);
 
 app.use("/users", userRoutes);
+app.use("/api/trips", tripRoutes);
 
-// Sunucu başlat
 const port = 3000;
 app.listen(port, () => console.log(`Server running on port ${port}`));
 
