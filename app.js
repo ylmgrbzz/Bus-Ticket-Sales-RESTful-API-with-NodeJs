@@ -21,6 +21,6 @@ app.use("/api/trips", tripRoutes);
 const port = 3000;
 app.listen(port, () => console.log(`Server running on port ${port}`));
 
-app.get("/", (req, res) => {
-  res.send("Merhaba Dünya!");
-});
+// app.get("/", (req, res) => {
+//   res.send("Merhaba Dünya!");
+// });
