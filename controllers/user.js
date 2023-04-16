@@ -1,13 +1,13 @@
 const express = require("express");
 const bodyParser = require("body-parser");
 const bcrypt = require("bcrypt");
-const User = require("./models/user");
+const User = require("../models/user");
 const jwt = require("jsonwebtoken");
 
 const router = express.Router();
 router.use(bodyParser.json());
 
-app.post("/register", async (req, res) => {
+router.post("/register", async (req, res) => {
   const { name, age, gender, email, phone, password } = req.body;
   if (!name || !age || !gender || !email || !phone || !password) {
     return res.status(400).json({ message: "Lütfen tüm alanları doldurunuz." });
@@ -38,7 +38,7 @@ app.post("/register", async (req, res) => {
   }
 });
 
-app.post("/login", async (req, res) => {
+router.post("/login", async (req, res) => {
   const { email, password } = req.body;
   if (!email || !password) {
     return res.status(400).json({ message: "Lütfen tüm alanları doldurunuz." });
@@ -50,10 +50,13 @@ app.post("/login", async (req, res) => {
     return res.status(401).json({ message: "Kullanıcı bulunamadı." });
   }
 
-  if (user.password !== password) {
+  const match = await bcrypt.compare(password, user.password);
+  if (!match) {
     return res.status(401).json({ message: "Hatalı şifre." });
   }
 
   const accessToken = jwt.sign({ email: user.email }, "mysecretkey");
   res.status(200).json({ accessToken: accessToken });
 });
+
+module.exports = router;
