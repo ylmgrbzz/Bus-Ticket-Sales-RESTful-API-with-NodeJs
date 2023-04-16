@@ -1,8 +1,8 @@
 const express = require("express");
 const bodyParser = require("body-parser");
-const Trip = require("../models/ticket");
+const Bilet = require("../models/bilet");
 
-app.post("/biletler", async (req, res) => {
+router.post("/biletler", async (req, res) => {
   const { seferId, yolcu, koltuklar } = req.body;
 
   if (!seferId || !yolcu || !koltuklar) {
@@ -19,23 +19,12 @@ app.post("/biletler", async (req, res) => {
     return res.status(400).json({ message: "En az bir koltuk seçmelisiniz" });
   }
 
-  for (const koltuk of koltuklar) {
-    if (!koltuk.koltukNumarasi || !koltuk.cinsiyet) {
-      return res
-        .status(400)
-        .json({ message: "Koltuk numarası ve cinsiyet bilgileri gereklidir" });
-    }
-  }
+  const genders = koltuklar.map((koltuk) => koltuk.cinsiyet);
+  const isGenderMatched = genders.every((gender) => gender === genders[0]);
 
-  const eslesmeBilet = await Bilet.findOne({
-    sefer: seferId,
-    "koltuklar.koltukNumarasi": koltuk.koltukNumarasi,
-  });
-
-  if (eslesmeBilet) {
+  if (!isGenderMatched) {
     return res.status(400).json({
-      message:
-        "Seçilen koltuklar müsait değil veya cinsiyet kısıtlamalarına uygun değil",
+      message: "Aynı bilete erkek ve kadın koltukları ekleyemezsiniz",
     });
   }
 
@@ -45,9 +34,34 @@ app.post("/biletler", async (req, res) => {
       .json({ message: "En fazla 5 koltuk seçebilirsiniz" });
   }
 
+  const reservedSeats = await Bilet.find({ seferId });
+  const reservedSeatNumbers = reservedSeats.reduce(
+    (seatNumbers, reservedSeat) => {
+      return seatNumbers.concat(
+        reservedSeat.koltuklar.map((koltuk) => koltuk.koltukNumarasi)
+      );
+    },
+    []
+  );
+
+  for (const koltuk of koltuklar) {
+    if (!koltuk.koltukNumarasi || !koltuk.cinsiyet) {
+      return res
+        .status(400)
+        .json({ message: "Koltuk numarası ve cinsiyet bilgileri gereklidir" });
+    }
+
+    if (reservedSeatNumbers.includes(koltuk.koltukNumarasi)) {
+      return res
+        .status(400)
+        .json({ message: "Seçilen koltuklar müsait değil" });
+    }
+
+    reservedSeatNumbers.push(koltuk.koltukNumarasi);
+  }
+
   const yeniBilet = new Bilet({
-    sefer: seferId,
-    yolcu: yolcu,
+    seferId: seferId,
     koltuklar: koltuklar,
   });
 
@@ -59,3 +73,5 @@ app.post("/biletler", async (req, res) => {
     return res.status(500).json({ message: "Bir hata oluştu" });
   }
 });
+
+module.exports = router;
