@@ -4,6 +4,7 @@ const mongoose = require("mongoose");
 const userRoutes = require("./controllers/user");
 const { requireAuth } = require("./middleware/user");
 const tripRoutes = require("./controllers/trip");
+const ticket = require("./controllers/ticket");
 
 const app = express();
 
@@ -17,6 +18,7 @@ app.use(bodyParser.json());
 
 app.use("/users", userRoutes);
 app.use("/api/trips", tripRoutes);
+app.use("/api/tickets", ticket);
 
 const port = 3000;
 app.listen(port, () => console.log(`Server running on port ${port}`));
