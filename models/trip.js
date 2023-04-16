@@ -22,12 +22,12 @@ tripSchema.methods.getDetailedInfo = function () {
 };
 tripSchema.methods.bookSeat = async function (seatNumber, passengerName) {
   if (!this.seats.includes(seatNumber)) {
-    throw new Error("Invalid seat number");
+    throw new Error("gecersiz koltuk numarası");
   }
 
   const index = this.seats.indexOf(seatNumber);
   if (this.seats[index].length !== 0) {
-    throw new Error("Seat is already booked");
+    throw new Error("koltuk zaten rezerve edilmiş");
   }
 
   this.seats[index] = passengerName;
