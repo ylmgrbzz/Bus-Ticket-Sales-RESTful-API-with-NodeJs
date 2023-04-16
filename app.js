@@ -12,7 +12,9 @@ mongoose.connection.on("error", (error) => console.log(error));
 mongoose.connection.once("open", () => console.log("Database connected!"));
 
 app.use(bodyParser.json());
-app.use("/users/login", requireAuth);
+// app.use("/users/login", requireAuth);
+// app.use("/users", userRoutes);
+
 app.use("/users", userRoutes);
 
 // Sunucu başlat

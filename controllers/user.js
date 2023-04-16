@@ -34,30 +34,35 @@ router.post("/register", async (req, res) => {
   try {
     await user.save();
     res.status(201).json({ message: "Kayıt başarılı." });
+    // console.log("Access Token:", accessToken);
   } catch (error) {
     res.status(400).json({ message: "Kayıt sırasında bir hata oluştu." });
   }
 });
 
 router.post("/login", async (req, res) => {
-  const { email, password } = req.body;
-  if (!email || !password) {
-    return res.status(400).json({ message: "Lütfen tüm alanları doldurunuz." });
+  try {
+    const { email, password } = req.body;
+
+    // Check if user exists
+    const user = await User.findOne({ email });
+    if (!user) {
+      return res.status(400).json({ message: "Invalid email or password" });
+    }
+
+    // Check if password is correct
+    const isMatch = await bcrypt.compare(password, user.password);
+    if (!isMatch) {
+      return res.status(400).json({ message: "Invalid email or password" });
+    }
+
+    // Create a JWT token
+    const token = jwt.sign({ id: user._id }, "mysecretkey");
+
+    res.status(200).json({ token });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
   }
-
-  const user = await User.findOne({ email: email });
-
-  if (!user) {
-    return res.status(401).json({ message: "Kullanıcı bulunamadı." });
-  }
-
-  const match = await bcrypt.compare(password, user.password);
-  if (!match) {
-    return res.status(401).json({ message: "Hatalı şifre." });
-  }
-
-  const accessToken = jwt.sign({ email: user.email }, "mysecretkey");
-  res.status(200).json({ accessToken: accessToken });
 });
 
 module.exports = router;
