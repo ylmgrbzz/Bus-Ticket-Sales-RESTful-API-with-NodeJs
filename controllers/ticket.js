@@ -90,4 +90,33 @@ router.get("/biletlerim", requireAuth, async (req, res) => {
   }
 });
 
+router.get("/biletDetay", async (req, res) => {
+  try {
+    const biletler = await Bilet.find();
+    const biletDetaylari = [];
+
+    for (const bilet of biletler) {
+      const sefer = await Sefer.findById(bilet.seferId);
+
+      for (const koltuk of bilet.koltuklar) {
+        const detay = {
+          kalkisSehri: sefer.kalkisSehri,
+          varisSehri: sefer.varisSehri,
+          saat: sefer.saat,
+          koltukNumarasi: koltuk.koltukNumarasi,
+          yolcuAdi: koltuk.yolcuAdi,
+          cinsiyet: koltuk.cinsiyet,
+        };
+
+        biletDetaylari.push(detay);
+      }
+    }
+
+    return res.status(200).json(biletDetaylari);
+  } catch (error) {
+    console.log(error);
+    return res.status(500).json({ message: "Bir hata oluştu" });
+  }
+});
+
 module.exports = router;
