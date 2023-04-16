@@ -3,6 +3,7 @@ const bodyParser = require("body-parser");
 const bcrypt = require("bcrypt");
 const User = require("../models/user");
 const jwt = require("jsonwebtoken");
+const { requireAuth } = require("../middleware/user");
 
 const router = express.Router();
 router.use(bodyParser.json());
