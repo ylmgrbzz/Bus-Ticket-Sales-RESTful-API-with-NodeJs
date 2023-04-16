@@ -1,6 +1,10 @@
+import { requireAuth } from "../middleware/user";
 const express = require("express");
 const bodyParser = require("body-parser");
 const Bilet = require("../models/bilet");
+
+const router = express.Router();
+router.use(bodyParser.json());
 
 router.post("/biletler", async (req, res) => {
   const { seferId, yolcu, koltuklar } = req.body;
@@ -68,6 +72,18 @@ router.post("/biletler", async (req, res) => {
   try {
     const kaydedilenBilet = await yeniBilet.save();
     return res.status(200).json(kaydedilenBilet);
+  } catch (error) {
+    console.log(error);
+    return res.status(500).json({ message: "Bir hata oluştu" });
+  }
+});
+
+router.get("/biletlerim", requireAuth, async (req, res) => {
+  try {
+    const biletler = await Bilet.find({ userId: req.user._id }).populate(
+      "seferId"
+    );
+    return res.status(200).json(biletler);
   } catch (error) {
     console.log(error);
     return res.status(500).json({ message: "Bir hata oluştu" });
